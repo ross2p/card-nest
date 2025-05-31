@@ -4,7 +4,9 @@ export const envSchema = z.object({
   // SERVER
   PORT: z.coerce.number().default(8082),
   BASE_URL: z.string().url(),
-  NODE_ENV: z.enum(['development', 'production', 'test', 'debug']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test', 'debug'])
+    .default('development'),
 
   // SWAGGER
   SWAGGER_USER: z.string(),
@@ -19,7 +21,9 @@ export const envSchema = z.object({
   // DATABASE_URL: z.string().url(),
 
   // JWT
-  JWT_SECRET_KEY: z.string().min(10, 'JWT_SECRET_KEY must be at least 10 characters'),
+  JWT_SECRET_KEY: z
+    .string()
+    .min(10, 'JWT_SECRET_KEY must be at least 10 characters'),
   ACCESS_TOKEN_EXPIRE: z.string().regex(/^\d+[smhd]$/, {
     message: 'ACCESS_TOKEN_EXPIRE must be a duration like 15m, 1h, 7d',
   }),
@@ -28,5 +32,4 @@ export const envSchema = z.object({
   }),
 });
 
-
-export const envValidate = (env) => (envSchema.parse(env))
+export const envValidate = (env) => envSchema.parse(env);

@@ -1,18 +1,25 @@
-import { INestApplication } from '@nestjs/common';
-import { SwaggerModule } from '@nestjs/swagger';
+import { HttpServer, INestApplication } from '@nestjs/common';
+import { OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { swaggerConfig } from '../configs/swagger.config';
-import basicAuth from "express-basic-auth";
+import { Request, Response } from 'express';
+import basicAuth from 'express-basic-auth';
 import { ConfigService } from '@nestjs/config';
 
-export const swaggerSetup = (app: INestApplication, configureService: ConfigService) => {
+export const swaggerSetup = (
+  app: INestApplication,
+  configureService: ConfigService,
+) => {
   const SWAGGER_USER = configureService.get<string>('SWAGGER_USER')!;
   const SWAGGER_PASSWORD = configureService.get<string>('SWAGGER_PASSWORD')!;
 
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  const adapter = app.getHttpAdapter();
+  const document: OpenAPIObject = SwaggerModule.createDocument(
+    app,
+    swaggerConfig,
+  );
+  const adapter: HttpServer = app.getHttpAdapter();
 
   app.use(
-    ["/api-docs/json", "/api-docs"],
+    ['/api-docs/json', '/api-docs'],
     basicAuth({
       challenge: true,
       users: { [SWAGGER_USER]: SWAGGER_PASSWORD },
@@ -20,9 +27,10 @@ export const swaggerSetup = (app: INestApplication, configureService: ConfigServ
   );
 
   // JSON endpoint
-  adapter.get('/api-docs/json', (_req, res) => res.json(document));
+  adapter.get('/api-docs/json', (_req: Request, res: Response) =>
+    res.json(document),
+  );
 
   // Swagger UI
   SwaggerModule.setup('api-docs', app, document);
 };
-

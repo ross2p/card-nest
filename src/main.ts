@@ -51,7 +51,11 @@ async function bootstrap() {
   app.useGlobalPipes(globalPipe);
 
   // Global filters
-  app.useGlobalFilters(new GlobalFilter(), new ErrorFilter(), new ExceptionFilter());
+  app.useGlobalFilters(
+    new GlobalFilter(),
+    new ErrorFilter(),
+    new ExceptionFilter(),
+  );
 
   // Interceptors
   app.useGlobalInterceptors(new ResponseInterceptor(reflector));

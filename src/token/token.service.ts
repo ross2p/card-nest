@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
 import { Payload } from './dtos/payload.interface';
@@ -11,21 +15,37 @@ export class TokenService {
   private readonly JWT_SECRET_KEY: string;
 
   constructor(configService: ConfigService) {
-    this.ACCESS_TOKEN_EXPIRE = configService.get<number>('ACCESS_TOKEN_EXPIRE')!;
-    this.REFRESH_TOKEN_EXPIRE = configService.get<number>('REFRESH_TOKEN_EXPIRE')!;
+    this.ACCESS_TOKEN_EXPIRE = configService.get<number>(
+      'ACCESS_TOKEN_EXPIRE',
+    )!;
+    this.REFRESH_TOKEN_EXPIRE = configService.get<number>(
+      'REFRESH_TOKEN_EXPIRE',
+    )!;
     this.JWT_SECRET_KEY = configService.get<string>('JWT_SECRET_KEY')!;
   }
 
-  private generateToken<T extends Payload>(data: T, expiresIn: number, secretKey: string): string {
+  private generateToken<T extends Payload>(
+    data: T,
+    expiresIn: number,
+    secretKey: string,
+  ): string {
     return jwt.sign(data, secretKey, { expiresIn });
   }
 
   public generateTokenByType<T extends Payload>(data: T): string {
     switch (data.type) {
       case TokenType.ACCESS:
-        return this.generateToken<T>(data, this.ACCESS_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
+        return this.generateToken<T>(
+          data,
+          this.ACCESS_TOKEN_EXPIRE,
+          this.JWT_SECRET_KEY,
+        );
       case TokenType.REFRESH:
-        return this.generateToken<T>(data, this.REFRESH_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
+        return this.generateToken<T>(
+          data,
+          this.REFRESH_TOKEN_EXPIRE,
+          this.JWT_SECRET_KEY,
+        );
       default:
         throw new BadRequestException('Invalid token type');
     }
@@ -33,15 +53,20 @@ export class TokenService {
 
   private verifyToken<T>(token: string, secretKey: string): T {
     try {
-      return (jwt.verify(token, secretKey)) as T;
-    } catch (err) {
+      return jwt.verify(token, secretKey) as T;
+    } catch {
       throw new BadRequestException('Invalid token');
     }
   }
 
-  public async verifyTokenByType<T extends Payload>(token: string, type: TokenType): Promise<T> {
+  public verifyTokenByType<T extends Payload>(
+    token: string,
+    type: TokenType,
+  ): T {
     if (!token) {
-      throw new UnauthorizedException('Access denied. No access token provided.');
+      throw new UnauthorizedException(
+        'Access denied. No access token provided.',
+      );
     }
     let data: T;
 

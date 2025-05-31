@@ -15,6 +15,3 @@ export class Tokens implements AccessToken, RefreshToken {
   })
   accessToken: string;
 }
-
-
-type tokens = AccessToken & RefreshToken;

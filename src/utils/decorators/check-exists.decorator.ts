@@ -1,13 +1,21 @@
 import { HttpException, NotFoundException } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Observable, isObservable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export function CheckExists(error?: string | HttpException) {
-  return function (target: any, key: string, descriptor: PropertyDescriptor) {
+type AsyncOrSync<T> = Promise<T> | Observable<T> | T;
+
+export function CheckExists<T>(error?: string | HttpException) {
+  return (
+    _target: object,
+    _propertyKey: string | symbol,
+    descriptor: TypedPropertyDescriptor<(...args: unknown[]) => AsyncOrSync<T>>,
+  ) => {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
-      const result = originalMethod.apply(this, args);
+    if (!originalMethod) return;
+
+    descriptor.value = function (...args: unknown[]) {
+      const result = originalMethod.apply(args) as AsyncOrSync<T>;
 
       const createException = () => {
         if (!error) return new NotFoundException('Record not found');
@@ -22,7 +30,7 @@ export function CheckExists(error?: string | HttpException) {
         });
       }
 
-      if (result instanceof Observable) {
+      if (isObservable(result)) {
         return result.pipe(
           map((data) => {
             if (!data) throw createException();
@@ -34,7 +42,5 @@ export function CheckExists(error?: string | HttpException) {
       if (!result) throw createException();
       return result;
     };
-
-    return descriptor;
   };
 }

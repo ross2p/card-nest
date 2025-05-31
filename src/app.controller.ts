@@ -1,7 +1,4 @@
-import {
-  Controller,
-  Get,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ResponseMessage } from './utils/decorators/response-message.decorator';
 import { ConfigService } from '@nestjs/config';
 import { version, name } from '../package.json';
@@ -9,11 +6,12 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
-  constructor(private readonly configService: ConfigService,) {}
+  constructor(private readonly configService: ConfigService) {}
 
   @ApiResponse({
     status: 200,
-    description: 'Returns the application status, including name, version, environment, memory usage, uptime, and timestamp.',
+    description:
+      'Returns the application status, including name, version, environment, memory usage, uptime, and timestamp.',
     schema: {
       example: {
         name: 'your-app-name',
@@ -27,13 +25,14 @@ export class AppController {
   })
   @Get()
   @ApiOperation({ summary: 'Get application status' })
-  @ResponseMessage("🚀 Server is operational")
-  public async applicationRun() {
+  @ResponseMessage('🚀 Server is operational')
+  public applicationRun() {
     return {
       name,
       version,
       environment: this.configService.get<string>('NODE_ENV'),
-      memoryUsage: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + ' MB',
+      memoryUsage:
+        (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2) + ' MB',
       uptime: Math.floor(process.uptime()) + ' seconds',
       timestamp: new Date().toISOString(),
     };

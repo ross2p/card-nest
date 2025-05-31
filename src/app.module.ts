@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
-import { DatabaseModule } from './database/database.module';
-import { envSchema, envValidate } from './utils/schemas/env.schema';
+import { envValidate } from './utils/schemas/env.schema';
 
 @Module({
   imports: [
@@ -10,7 +9,6 @@ import { envSchema, envValidate } from './utils/schemas/env.schema';
       isGlobal: true,
       validate: envValidate,
     }),
-    // DatabaseModule,
   ],
   controllers: [AppController],
 })

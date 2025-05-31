@@ -1,47 +1,16 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient, Prisma } from '@prisma/client';
-
-// const softDeleteExtension = Prisma.defineExtension({
-//   name: 'softDelete',
-//   model: {
-//     $allModels: {
-//       async delete(args) {
-//         return this.update({
-//           ...args,
-//           data: {
-//             deletedAt: new Date(),
-//           },
-//         });
-//       },
-//       async deleteMany(args) {
-//         return this.updateMany({
-//           ...args,
-//           data: {
-//             deletedAt: new Date(),
-//           },
-//         });
-//       },
-//     },
-//   },
-// });
-//
-// const findAndCountExtension = Prisma.defineExtension({
-//   name: 'findAndCount',
-//   model: {
-//     $allModels: {
-//       async findAndCount(args) {
-//         const [data, count] = await Promise.all([
-//           this.findMany(args),
-//           this.count({ where: args.where }),
-//         ]);
-//         return { data, count };
-//       },
-//     },
-//   },
-// });
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class DatabaseService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class DatabaseService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(DatabaseService.name);
 
   async onModuleInit() {

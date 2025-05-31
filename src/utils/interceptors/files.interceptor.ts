@@ -2,7 +2,7 @@ import { FilesInterceptor as NestFilesInterceptor } from '@nestjs/platform-expre
 import { UnsupportedMediaTypeException } from '@nestjs/common';
 import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '../constants.utils';
 
-export const FilesInterceptor = (fileName = "file") => {
+export const FilesInterceptor = (fileName = 'file') => {
   return NestFilesInterceptor(fileName, undefined, {
     limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (_req, file, cb) => {

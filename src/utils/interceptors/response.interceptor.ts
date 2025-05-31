@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RESPONSE_MESSAGE_KEY } from '../constants.utils';
+import { Response } from 'express';
 import { SuccessResponse } from '../response/success.response';
 
 @Injectable()
@@ -16,14 +17,13 @@ export class ResponseInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToHttp();
-    const response = ctx.getResponse();
+    const response = ctx.getResponse<Response>();
     const handler = context.getHandler();
 
-    const message =
-      this.reflector.get<string>(RESPONSE_MESSAGE_KEY, handler);
+    const message = this.reflector.get<string>(RESPONSE_MESSAGE_KEY, handler);
     const status: number = response.statusCode;
-    return next.handle().pipe(
-      map((data: unknown) => (new SuccessResponse(data, message, status))),
-    );
+    return next
+      .handle()
+      .pipe(map((data: unknown) => new SuccessResponse(data, message, status)));
   }
 }
