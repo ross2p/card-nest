@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
-import { TokenType } from '../../enums';
-import { UserPayload } from '../../interfaces';
-import { Tokens } from './dtos/tokens.dto';
+import { Payload } from './dtos/payload.interface';
+import { TokenType } from './tokenType.enum';
 
 @Injectable()
 export class TokenService {
@@ -17,59 +16,47 @@ export class TokenService {
     this.JWT_SECRET_KEY = configService.get<string>('JWT_SECRET_KEY')!;
   }
 
-  private async generateToken(data: any, expiresIn: number, secretKey: string): Promise<string> {
+  private generateToken<T extends Payload>(data: T, expiresIn: number, secretKey: string): string {
     return jwt.sign(data, secretKey, { expiresIn });
   }
 
-  public async generateTokenByType(data: any, type: TokenType): Promise<string> {
-    data.type = type;
-
-    switch (type) {
+  public generateTokenByType<T extends Payload>(data: T): string {
+    switch (data.type) {
       case TokenType.ACCESS:
-        return this.generateToken(data, this.ACCESS_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
+        return this.generateToken<T>(data, this.ACCESS_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
       case TokenType.REFRESH:
-        return this.generateToken(data, this.REFRESH_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
+        return this.generateToken<T>(data, this.REFRESH_TOKEN_EXPIRE, this.JWT_SECRET_KEY);
       default:
         throw new BadRequestException('Invalid token type');
     }
   }
 
-  private async verifyToken(token: string, secretKey: string) {
+  private verifyToken<T>(token: string, secretKey: string): T {
     try {
-      return jwt.verify(token, secretKey);
+      return (jwt.verify(token, secretKey)) as T;
     } catch (err) {
       throw new BadRequestException('Invalid token');
     }
   }
 
-  public async verifyTokenByType(token: string, type: TokenType) {
+  public async verifyTokenByType<T extends Payload>(token: string, type: TokenType): Promise<T> {
     if (!token) {
       throw new UnauthorizedException('Access denied. No access token provided.');
     }
-    let data: UserPayload;
+    let data: T;
 
     switch (type) {
       case TokenType.ACCESS:
       case TokenType.REFRESH:
-        data = (await this.verifyToken(token, this.JWT_SECRET_KEY)) as UserPayload;
+        data = this.verifyToken<T>(token, this.JWT_SECRET_KEY);
         break;
       default:
         throw new BadRequestException('Invalid token type');
     }
+
     if (data.type !== type) {
-      throw new BadRequestException('Invalid token');
+      throw new BadRequestException('Invalid token type');
     }
     return data;
-  }
-
-  public async generateAccessTokens(user: UserPayload): Promise<Tokens> {
-    const tokenUser = {
-      id: user.id,
-      email: user.email,
-      isVerified: user.isVerified,
-    } as UserPayload;
-
-    const [accessToken, refreshToken] = await Promise.all([this.generateTokenByType(tokenUser, TokenType.ACCESS), this.generateTokenByType(tokenUser, TokenType.REFRESH)]);
-    return { accessToken, refreshToken };
   }
 }

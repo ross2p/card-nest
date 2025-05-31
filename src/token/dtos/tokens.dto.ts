@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AccessToken } from './accessToken.dto';
-import { RefreshToken } from './refresh.token.dto';
+import { AccessToken } from './access-token.dto';
+import { RefreshToken } from './refresh-token.dto';
 
 export class Tokens implements AccessToken, RefreshToken {
   @ApiProperty({
@@ -15,3 +15,6 @@ export class Tokens implements AccessToken, RefreshToken {
   })
   accessToken: string;
 }
+
+
+type tokens = AccessToken & RefreshToken;
